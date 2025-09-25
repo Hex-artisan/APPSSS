@@ -26,8 +26,8 @@ export default function ProductList({ addToCart }) {
         const res = await fetch('https://dummyjson.com/products?limit=100')
         const data = await res.json()
         setProducts(data.products)
-        // extract categories
-        const cats = Array.from(new Set(data.products.map(p => p.category)))
+  // extract categories (ignore falsy values)
+  const cats = Array.from(new Set(data.products.map(p => p.category).filter(Boolean)))
         setCategories(cats)
         // set default max price
       const max = Math.max(...data.products.map(p => p.price))
@@ -65,11 +65,11 @@ export default function ProductList({ addToCart }) {
       const q = String(query).toLowerCase()
       list = list.filter(p => (p?.title || '').toLowerCase().includes(q) || (p?.brand || '').toLowerCase().includes(q) || (p?.description || '').toLowerCase().includes(q))
     }
-    if (category !== 'all') list = list.filter(p => p.category === category)
-    list = list.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
-    if (sort === 'price-asc') list.sort((a,b)=>a.price-b.price)
-    if (sort === 'price-desc') list.sort((a,b)=>b.price-a.price)
-    if (sort === 'rating-desc') list.sort((a,b)=>b.rating-a.rating)
+  if (category !== 'all') list = list.filter(p => (p?.category || '') === category)
+  list = list.filter(p => (p?.price ?? 0) >= (priceRange[0] ?? 0) && (p?.price ?? 0) <= (priceRange[1] ?? Infinity))
+  if (sort === 'price-asc') list.sort((a,b)=> (a?.price ?? 0) - (b?.price ?? 0))
+  if (sort === 'price-desc') list.sort((a,b)=> (b?.price ?? 0) - (a?.price ?? 0))
+  if (sort === 'rating-desc') list.sort((a,b)=> (b?.rating ?? 0) - (a?.rating ?? 0))
     return list
   }
 
